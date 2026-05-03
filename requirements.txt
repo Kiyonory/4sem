@@ -1,0 +1,4 @@
+Django>=5.1,<6
+Faker>=30.0,<31
+Pillow>=10.0,<12
+reportlab>=4.0,<5

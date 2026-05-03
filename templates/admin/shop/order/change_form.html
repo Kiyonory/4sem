@@ -1,0 +1,87 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block after_related_objects %}
+{{ block.super }}
+<script>
+(function() {
+  var optionsUrl = '{{ product_variant_options_url|default:"" }}';
+  if (!optionsUrl) {
+    var base = window.location.pathname.replace(/\/add\/?$/, '').replace(/\/\d+\/change\/?$/, '');
+    optionsUrl = window.location.origin + base + 'product-variant-options/';
+  }
+  if (optionsUrl && optionsUrl.indexOf('http') !== 0) optionsUrl = window.location.origin + optionsUrl;
+
+  function updateSelect(select, options, selectedId) {
+    if (!select) return;
+    var keepValue = selectedId !== undefined ? String(selectedId) : select.value;
+    select.innerHTML = '';
+    var emptyOpt = document.createElement('option');
+    emptyOpt.value = '';
+    emptyOpt.textContent = options.length ? '--------' : 'Сначала выберите товар';
+    select.appendChild(emptyOpt);
+    options.forEach(function(o) {
+      var opt = document.createElement('option');
+      opt.value = o.id;
+      opt.textContent = o.name;
+      select.appendChild(opt);
+    });
+    if (keepValue && select.querySelector('option[value="' + keepValue + '"]')) {
+      select.value = keepValue;
+    }
+  }
+
+  function onProductChange(productSelect) {
+    var productId = productSelect.value;
+    var row = productSelect.closest('tr');
+    var sizeSelect = row ? row.querySelector('select[name$="-size"]') : null;
+    var colorSelect = row ? row.querySelector('select[name$="-color"]') : null;
+    if (!sizeSelect && productSelect.name) {
+      var prefix = productSelect.name.replace(/-product$/, '');
+      sizeSelect = document.querySelector('select[name="' + prefix + '-size"]');
+      colorSelect = document.querySelector('select[name="' + prefix + '-color"]');
+    }
+    var savedSize = sizeSelect ? sizeSelect.value : '';
+    var savedColor = colorSelect ? colorSelect.value : '';
+    if (!productId) {
+      updateSelect(sizeSelect, []);
+      updateSelect(colorSelect, []);
+      return;
+    }
+    if (!sizeSelect || !colorSelect) return;
+    fetch(optionsUrl + '?product_id=' + encodeURIComponent(productId))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        updateSelect(sizeSelect, data.sizes || [], savedSize);
+        updateSelect(colorSelect, data.colors || [], savedColor);
+      })
+      .catch(function() {
+        updateSelect(sizeSelect, [], savedSize);
+        updateSelect(colorSelect, [], savedColor);
+      });
+  }
+
+  function runInit() {
+    // Только вешаем обработчик смены товара. При загрузке страницы не трогаем выпадающие списки —
+    // при редактировании заказа товар/размер/цвет уже отрендерены сервером и должны остаться как есть.
+    document.querySelectorAll('select[name$="-product"]').forEach(function(sel) {
+      if (sel.dataset.variantOptionsAttached) return;
+      sel.dataset.variantOptionsAttached = '1';
+      sel.addEventListener('change', function() { onProductChange(this); });
+    });
+  }
+
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.tagName === 'SELECT' && e.target.name && e.target.name.indexOf('-product') !== -1 && e.target.name.endsWith('-product')) {
+      onProductChange(e.target);
+    }
+  }, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runInit);
+  } else {
+    runInit();
+  }
+})();
+</script>
+{% endblock %}

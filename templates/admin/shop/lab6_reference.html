@@ -1,0 +1,55 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:shop_lab6scratch_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; {% trans 'Лаба 6 — демонстрация ORM' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>Лаба 6 — демонстрация в проекте</h1>
+<p class="help">{{ urlfield_example }}. См. также <code>shop/models.py</code> и <code>shop/lab_reference.py</code> (контекст для этой страницы).</p>
+
+<h2>__icontains и __contains</h2>
+<p>Буква в фильтре: «{{ sample_letter }}»</p>
+<p><strong>icontains</strong> (в проекте демонстрируется через Lower(name) — без учёта регистра):</p>
+<ul>
+    {% for p in icontains_qs %}
+    <li>{{ p.name }}</li>
+    {% empty %}<li>нет совпадений</li>{% endfor %}
+</ul>
+<p><strong>contains</strong> (в SQLite демонстрируется через GLOB — чувствительно к регистру):</p>
+<ul>
+    {% for p in contains_qs %}
+    <li>{{ p.name }}</li>
+    {% empty %}<li>нет совпадений</li>{% endfor %}
+</ul>
+
+<h2>values() — словари по полям</h2>
+<pre style="white-space:pre-wrap;font-size:0.85rem;">{{ values_sample }}</pre>
+
+<h2>values_list() — кортежи и flat=True</h2>
+<p>Кортежи (id, name):</p>
+<pre style="white-space:pre-wrap;font-size:0.85rem;">{{ values_list_tuples }}</pre>
+<p>flat=True — только name:</p>
+<pre style="white-space:pre-wrap;font-size:0.85rem;">{{ values_list_flat }}</pre>
+
+<h2>count() и exists()</h2>
+<p>Всего товаров (count): <strong>{{ products_count }}</strong></p>
+<p>Есть ли товары (exists по pk&gt;0): <strong>{{ products_exist }}</strong></p>
+<p>Есть ли бренд «ZZZ_NONEXISTENT» (exists = false): <strong>{{ brands_exist }}</strong></p>
+
+<h2>Кеш (LocMemCache)</h2>
+<p>Ключ <code>lab6_product_count</code>: попадание в кеш при этой загрузке = <strong>{{ cache_hit }}</strong>, значение = <strong>{{ cached_count }}</strong> (обновите страницу — второй раз будет cache hit).</p>
+
+<h2>update(), delete(), F()</h2>
+<p>Создана строка Lab6Scratch, counter увеличен через <code>F('counter') + 1</code> → стало <strong>{{ counter_after_f }}</strong>.</p>
+<p>Затем <code>delete()</code>: удалено строк <strong>{{ deleted_count }}</strong>, по моделям: <code>{{ deleted_by_model }}</code>.</p>
+
+<h2>Http404</h2>
+<p>Откройте <a href="{% url 'admin:shop_lab6_reference' %}?notfound=1">?notfound=1</a> — будет ошибка 404 (демонстрация).</p>
+<p><a href="{% url 'admin:index' %}">{% trans 'На главную админки' %}</a></p>
+{% endblock %}
