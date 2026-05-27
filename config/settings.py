@@ -69,8 +69,12 @@ TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Vue (Vite): в DEBUG — скрипты с dev-сервера; иначе — static/frontend после npm run build
+FRONTEND_VITE_DEV_SERVER = 'http://localhost:5173'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'shop.User'

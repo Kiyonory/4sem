@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Магазин — Vue</title>
+  {% if not vite_dev %}
+    {% for href in vite_css %}
+    <link rel="stylesheet" href="{% static href %}">
+    {% endfor %}
+  {% endif %}
+</head>
+<body>
+  <div id="app"></div>
+  {% if vite_dev %}
+  <script type="module" src="{{ vite_dev_server }}/@vite/client"></script>
+  <script type="module" src="{{ vite_dev_server }}/src/main.js"></script>
+  {% elif vite_built %}
+    {% for src in vite_js %}
+    <script type="module" src="{% static src %}"></script>
+    {% endfor %}
+  {% else %}
+  <p style="font-family: sans-serif; padding: 2rem;">
+    Соберите фронтенд: <code>cd frontend && npm run build</code>
+    или запустите <code>npm run dev</code> в <code>frontend/</code> при <code>DEBUG=True</code>.
+  </p>
+  {% endif %}
+</body>
+</html>

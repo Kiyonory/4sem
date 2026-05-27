@@ -9,3 +9,7 @@ db.sqlite3
 media/
 venv/
 .env
+
+# Vue / Vite
+frontend/node_modules/
+static/frontend/
