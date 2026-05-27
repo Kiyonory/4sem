@@ -1,0 +1,41 @@
+# Лаба 7: PostgreSQL + pgAdmin (отдельно от Django SQLite)
+# Запуск: docker compose up -d
+# pgAdmin: http://localhost:5050
+
+services:
+  lab7-db:
+    image: postgres:16-alpine
+    container_name: shop_lab7_postgres
+    environment:
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+      POSTGRES_DB: shop_lab7
+    ports:
+      - "5434:5432"
+    volumes:
+      - lab7_pgdata:/var/lib/postgresql/data
+      # При первом запуске контейнера создаёт таблицы shop_* (без Django)
+      - ./sql/lab7_bootstrap.sql:/docker-entrypoint-initdb.d/01-bootstrap.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop_lab7"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  lab7-pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: shop_lab7_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      lab7-db:
+        condition: service_healthy
+
+volumes:
+  lab7_pgdata:

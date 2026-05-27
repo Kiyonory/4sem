@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "shop_lab7 (Docker)",
+      "Group": "Lab 7",
+      "Host": "lab7-db",
+      "Port": 5432,
+      "MaintenanceDB": "shop_lab7",
+      "Username": "shop",
+      "Password": "shop",
+      "SSLMode": "prefer"
+    }
+  }
+}
